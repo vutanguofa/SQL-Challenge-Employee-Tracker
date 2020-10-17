@@ -1,3 +1,5 @@
+-- pre-populate data into the employees database
+
 INSERT INTO department (name)
 VALUES
     ('Frontend'),

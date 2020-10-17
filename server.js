@@ -1,92 +1,29 @@
+const mysql = require('mysql2');
 const inquirer = require('inquirer');
+//const cTable = require('console.table');
 
-// Inquirer prompts for userSelection
-const menuSelection = [
-    {
-        // WHEN I start the application
-        //THEN I am presented with the following options: view all departments, view all roles, view all employees, add a department, add a role, add an employee, and update an employee role
-        type: 'list',
-        name: 'selection',
-        message: "Please select an option.",
-        choices: [
-            'view all departments',
-            'view all roles',
-            'view all employees',
-            'add a department',
-            'add a role',
-            'add an employee',
-            'update an employee role'
-        ]
-    }
-];
+// create the connection to database
+const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'vutang',
+    password: 'vutang',
+    database: 'employees'
+});
 
-// Main function
-async function init() {
-    try {
+connection.connect(err => {
+    if (err) throw err;
+    console.log(' WELCOME TO EMPLOYEE TRACKER!')
 
-        // Prompt Inquirer menuSelection
-        const userSelection = await inquirer.prompt(menuSelection);
+    init();
+});
 
-        console.log("Your responses: ", userSelection.selection);
-        if (userSelection.selection == 'view all departments') {
-            departments();
-        };
-
-        if (userSelection.selection === 'view all roles') {
-            roles();
-        };
-
-        if (userSelection.selection === 'view all employees') {
-            employees();
-        };
-
-        if (userSelection.selection === 'add a department') {
-            addDepartment();
-        };
-
-        if (userSelection.selection === 'add a role') {
-            addRole();
-        };
-
-        if (userSelection.selection === 'add an employee') {
-            addEmployee();
-        };
-
-        if (userSelection.selection === 'update an employee role') {
-            updateEmployeeRole();
-        };
-
-    } catch (error) {
-        console.log(error);
-    }
+init = () => {
+    connection.query(
+        'SELECT * FROM role',
+        function (err, results, fields) {
+            console.log(results); // results contains rows returned by server
+            console.log(fields); // fields contains extra meta data about results, if available
+        }
+    );
 };
 
-departments = () => {
-    console.log('You selected to view departments');
-};
-
-roles = () => {
-    console.log('You selected to view roles');
-};
-
-employees = () => {
-    console.log('You selected to view employees');
-};
-
-addDepartment = () => {
-    console.log('You selected to add a department');
-};
-
-addRole = () => {
-    console.log('You selected to add a role');
-};
-
-addEmployee = () => {
-    console.log('You selected to add an employee ');
-};
-
-updateEmployeeRole = () => {
-    console.log('You selected to update an employee role');
-};
-
-init();
