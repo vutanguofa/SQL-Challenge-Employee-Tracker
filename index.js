@@ -169,13 +169,14 @@ addDepartment = () => {
         }
     ).then(answer => {
         const departAnswer = answer.departmentname;
+        console.log(departAnswer);
         con.connect(function (err) {
             if (err) throw err;
-            const sql = "INSERT INTO department (name) VALUES" + "('" + departAnswer +"')";
-            con.query(sql, [values], function (err, result) {
+            console.log("Connected!");
+            const sql = "INSERT INTO department (name) VALUES ('" + departAnswer + "')";
+            con.query(sql, function (err, result) {
                 if (err) throw err;
                 console.log("Success! Here are the results: " + result);
-                mainMenu();
             });
         });
     });
