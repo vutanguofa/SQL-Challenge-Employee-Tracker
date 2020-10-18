@@ -2,13 +2,13 @@
   "name": "sql-challenge-employee-tracker",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "sqlite3 db/employees.db < db/schema.sql",
     "seed": "sqlite3 db/employees.db < db/seeds.sql",
     "db": "sqlite3 db/employees.db",
-    "start": "node server.js"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -24,6 +24,7 @@
     "console.table": "^0.10.0",
     "express": "^4.17.1",
     "inquirer": "^7.3.3",
+    "mysql": "^2.18.1",
     "mysql2": "^2.2.5",
     "sqlite3": "^5.0.0"
   },
