@@ -1,8 +1,6 @@
 const mysql = require('mysql2');
-const express = require('express');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
-const sqlite3 = require('sqlite3').verbose();
 
 const con = mysql.createConnection({
     host: "localhost",
@@ -39,7 +37,6 @@ const con = mysql.createConnection({
 // });
 // Create table and insert section
 
-
 // Query data section
 // con.connect(function (err) {
 //     if (err) throw err;
@@ -62,22 +59,19 @@ const con = mysql.createConnection({
 
 // init();
 
-
-
-
 const menuSelection = [
     {
         type: 'list',
         name: 'selection',
-        message: "Please select an option.",
+        message: "What would you like to do?",
         choices: [
-            'view all departments',
-            'view all roles',
-            'view all employees',
-            'add a department',
-            'add a role',
-            'add an employee',
-            'update an employee role'
+            'View all departments',
+            'View all roles',
+            'View all employees',
+            'Add a department',
+            'Add a role',
+            'Add an employee',
+            'Update an employee role'
         ]
     }
 ];
@@ -85,37 +79,34 @@ const menuSelection = [
 // Main menu function
 async function mainMenu() {
     try {
-
         // Prompt Inquirer menuSelection
         const userSelection = await inquirer.prompt(menuSelection);
-
-        console.log("Your responses: ", userSelection.selection);
-        if (userSelection.selection == 'view all departments') {
+        if (userSelection.selection === 'View all departments') {
             departments();
         };
 
-        if (userSelection.selection === 'view all roles') {
+        if (userSelection.selection === 'View all roles') {
             roles();
         };
 
-        if (userSelection.selection === 'view all employees') {
+        if (userSelection.selection === 'View all employees') {
             employees();
         };
 
-        if (userSelection.selection === 'add a department') {
+        if (userSelection.selection === 'Add a department') {
             addDepartment();
         };
 
-        if (userSelection.selection === 'add a role') {
+        if (userSelection.selection === 'Add a role') {
             addRole();
         };
 
-        if (userSelection.selection === 'add an employee') {
+        if (userSelection.selection === 'Add an employee') {
             addEmployee();
         };
 
-        if (userSelection.selection === 'update an employee role') {
-            updateEmployeeRole();
+        if (userSelection.selection === 'Update an employee role') {
+            updateEmployeeRoleupdateEmployeeRole();
         };
 
     } catch (error) {
@@ -128,9 +119,10 @@ async function mainMenu() {
 departments = () => {
     con.connect(function (err) {
         if (err) throw err;
-        con.query("SELECT * FROM department", function (err, result, fields) {
+        con.query("SELECT * FROM department", function (err, result) {
             if (err) throw err;
-            console.log(result);
+            const departmentTable = cTable.getTable(result);
+            console.log(departmentTable);
             mainMenu();
         });
     });
@@ -139,9 +131,10 @@ departments = () => {
 roles = () => {
     con.connect(function (err) {
         if (err) throw err;
-        con.query("SELECT * FROM role", function (err, result, fields) {
+        con.query("SELECT * FROM role", function (err, result) {
             if (err) throw err;
-            console.log(result);
+            const rolesTable = cTable.getTable(result);
+            console.log(rolesTable);
             mainMenu();
         });
     });
@@ -150,9 +143,10 @@ roles = () => {
 employees = () => {
     con.connect(function (err) {
         if (err) throw err;
-        con.query("SELECT * FROM employee", function (err, result, fields) {
+        con.query("SELECT * FROM employee", function (err, result) {
             if (err) throw err;
-            console.log(result);
+            const employeesTable = cTable.getTable(result);
+            console.log(employeesTable);
             mainMenu();
         });
     });
@@ -169,14 +163,13 @@ addDepartment = () => {
         }
     ).then(answer => {
         const departAnswer = answer.departmentname;
-        console.log(departAnswer);
         con.connect(function (err) {
             if (err) throw err;
-            console.log("Connected!");
             const sql = "INSERT INTO department (name) VALUES ('" + departAnswer + "')";
             con.query(sql, function (err, result) {
                 if (err) throw err;
-                console.log("Success! Here are the results: " + result);
+                console.log("Success!");
+                mainMenu();
             });
         });
     });
@@ -213,29 +206,30 @@ addRole = () => {
         {
             type: 'list',
             name: 'departmentname',
-            message: 'What department would you like to add this role to?',
-            choices: function () {
-                var depArray = [];
-
-                res.forEach(department => {
-                    depArray.push(department.name)
-                });
-                return depArray;
-            }
+            message: 'What department would you like to add this role to?' + '\n' + 'Select (1) for Frontend' + '\n' + 'Select (2) for Support' + '\n' + 'Select (3) for Management' + '\n',
+            choices: [
+                '1',
+                '2',
+                '3',
+            ]
         }
-    ])
-        .then(answer => {
-            connection.query(`INSERT INTO role SET ?`, {
-                title: answer.rolename,
-                salary: answer.salaryamount,
-                department_id: answer.departmentName
-            }),
-                console.log('Role added')
-
-            mainMenu();
-        })
-
-    console.log('You selected to add a role');
+    ]).then(answer => {
+        const roleAnswer = answer.rolename;
+        const salaryAmtAnswer = answer.salaryamount;
+        const departNameAnswer = answer.departmentname;
+        con.connect(function (err) {
+            if (err) throw err;
+            const sql = "INSERT INTO role (title, salary, department_id) VALUES ?";
+            const values = [
+                [roleAnswer, salaryAmtAnswer, departNameAnswer]
+            ];
+            con.query(sql, [values], function (err) {
+                if (err) throw err;
+                console.log("Success!");
+                mainMenu();
+            });
+        });
+    });
 };
 
 addEmployee = () => {
@@ -287,33 +281,85 @@ addEmployee = () => {
                 if (answer) {
                     return true;
                 } else {
-                    console.log("Pkease eneter the manager's ID.");
+                    console.log("Please eneter the manager's ID.");
                     return false;
                 }
             }
-
         }
-
-    ])
-        .then(answer => {
-            connection.query(`INSERT INTO employee SET ?`, {
-                first_name: answer.first.name,
-                last_name: answer.lastname,
-                role_id: answer.rolename,
-                manager_id: answer.managerid
+    ]).then(answer => {
+        const firstNameAnswer = answer.firstname;
+        const lastNameAnswer = answer.lastname;
+        const roleNameAnswer = answer.rolename;
+        const managerIdAnswer = answer.managerid;
+        con.connect(function (err) {
+            if (err) throw err;
+            const sql = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ?";
+            const values = [
+                [firstNameAnswer, lastNameAnswer, roleNameAnswer, managerIdAnswer]
+            ];
+            con.query(sql, [values], function (err) {
+                if (err) throw err;
+                console.log("Success!");
+                mainMenu();
             });
-            console.log('New employee added');
-
-            mainMenu();
         });
-    console.log('You selected to add an employee ');
+    });
 };
 // Add selection
 
 // Update selection
-updateEmployeeRole = () => {
-    console.log('You selected to update an employee role');
-    mainMenu();
+updateEmployeeRoleupdateEmployeeRole = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'employeeId',
+            message: "Enter employee ID.",
+            validate: answer => {
+                if (answer) {
+                    return true;
+                } else {
+                    console.log("Please enter the employee's ID.");
+                    return false;
+                }
+            }
+        },
+        {
+            type: 'input',
+            name: 'newRole',
+            message: 'What would you like to change the employee role to?' + '\n' + 'Select (1) for CS Agent 1' + '\n' + 'Select (2) for Team Lead' + '\n' + 'Select (3) for Supervisor' + '\n' + 'Select (4) for Technical Support' + '\n' + 'Select (5) for IT Support' + '\n' + 'Select (6) for Engineer' + '\n' + 'Select (7) for Project Manager' + '\n' + 'Select (8) for Work Director' + '\n' + 'Select (9) for Director' + '\n',
+            choices: [
+                '1',
+                '2',
+                '3',
+                '4',
+                '5',
+                '6',
+                '7',
+                '8',
+                '9'
+            ],
+            validate: answer => {
+                if (answer) {
+                    return true;
+                } else {
+                    console.log("Please enter the employee's last name.");
+                    return false;
+                }
+            }
+        },
+    ]).then(answer => {
+        const employeeIdAnswer = answer.employeeId;
+        const newRoleAnswer = answer.newRole;
+        con.connect(function (err) {
+            if (err) throw err;
+            const sql = "UPDATE employee SET role_id = '" + newRoleAnswer + "'" + "WHERE id = '" + employeeIdAnswer + "'";
+            con.query(sql, function (err) {
+                if (err) throw err;
+                console.log("Success!");
+                mainMenu();
+            });
+        });
+    });
 };
 // Update selection
 
