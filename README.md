@@ -17,7 +17,7 @@ Developers frequently have to create interfaces that make it easy for non-develo
 
 ## Walkthrough
 
-[Link to video walkthrough](https://github.com/vutanguofa/SQL-Challenge-Employee-Tracker)
+[Link to YouTube walkthrough](https://www.youtube.com/watch?v=XZH3AS0b_UA&feature=youtu.be)
 
 ## Link to deployed application
 
